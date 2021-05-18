@@ -943,7 +943,7 @@ library Counters {
     }
 }
 
-contract MangoAccessControl{
+contract PandamanAccessControl{
     
     address payable public ceoAddress;
     address payable public cfoAddress;
@@ -999,10 +999,10 @@ pragma solidity ^0.8.0;
 
 
 
-contract MangoNFTBase is MangoAccessControl,ERC1155{
+contract PandamanDAOBase is PandamanAccessControl,ERC1155{
     
-    string public constant name = "MangoDAO";
-    string public constant symbol = "Mango";
+    string public constant name = "PandamanNFT";
+    string public constant symbol = "PANDA";
     
     struct Game{
         address manager;
@@ -1083,7 +1083,7 @@ contract MangoNFTBase is MangoAccessControl,ERC1155{
     event AuctionCancelled(uint256 saleId);
 
     
-    constructor() ERC1155("https://mangodao.com/api/item/{id}.json"){
+    constructor() ERC1155("https://pandamandao.com/api/item/{id}.json"){
         ceoAddress = payable(_msgSender());
         cfoAddress = payable(_msgSender());
         cooAddress = payable(_msgSender());
@@ -1122,7 +1122,7 @@ contract MangoNFTBase is MangoAccessControl,ERC1155{
     
     function createNFT(address account, uint256 amount, uint16 itemType,string memory itemName,uint16 gameId,bool isSingle,bool isCopyright,bytes memory data)public virtual onlyPartner{
         Game memory game = games[gameId];
-        require(game.manager == _msgSender(),"MangoDAOBase: msgsender not manager!");
+        require(game.manager == _msgSender(),"PandamanDAOBase: msgsender not manager!");
         
         uint256 newItemId = _tokenIds.current();
         if(isSingle == true || isCopyright == true){
@@ -1145,9 +1145,9 @@ contract MangoNFTBase is MangoAccessControl,ERC1155{
     function mint(address account, uint256 id, uint256 amount,bytes memory data)public onlyPartner{
         uint256 newItemId = _tokenIds.current();
         if(newItemId > id){
-            require(creators[id] == _msgSender(),"ERC1155: caller is not minter of the token");
+            require(creators[id] == _msgSender(),"PandamanDAOBase: caller is not minter of the token");
             ItemAttr memory attr = tokenIdToItemAttr[id];
-            require(attr.isSingle == false,"ERC1155: this item isOnly");
+            require(attr.isSingle == false,"PandamanDAOBase: this item isOnly");
             _mint(account,id,amount,data);
             tokenSupply[id] = tokenSupply[id] + amount;
         }
@@ -1279,7 +1279,7 @@ contract MangoNFTBase is MangoAccessControl,ERC1155{
     function addShop(uint256 _tokenId,uint256 _price,uint256 _royalty) public onlyPartner{
         ItemAttr storage attr = tokenIdToItemAttr[_tokenId];
         Game memory game = games[attr.gameId];
-        require(game.manager == _msgSender(),"MangoDAOBase: msgsender not manager!");
+        require(game.manager == _msgSender(),"PandamanDAOBase: msgsender not manager!");
         require(attr.isCopyright == true,"Goods must have copyright attribute");
         require(_royalty <= 10000);
         ItemShop memory shop = ItemShop(_price,_royalty,true);
@@ -1506,22 +1506,21 @@ contract MangoNFTBase is MangoAccessControl,ERC1155{
     
     function updateCopyrightPerson(uint256 _tokenId) public{
         ItemAttr storage attr = tokenIdToItemAttr[_tokenId];
-        require(attr.isCopyright == true,"MangoDAOBase:Item must have a copyright property");
-        require(balanceOf(_msgSender(),_tokenId) > 0,"MangoDAOBase: The item is insufficient");
+        require(attr.isCopyright == true,"PandamanDAOBase:Item must have a copyright property");
+        require(balanceOf(_msgSender(),_tokenId) > 0,"PandamanDAOBase: The item is insufficient");
         copyrightPerson[_tokenId] = _msgSender();
     }
 
 }
 
 
-contract MangoNFT is MangoNFTBase {
+contract PandamanNFT is PandamanDAOBase {
     
     using Counters for Counters.Counter;
     Counters.Counter public _saleIds;
 
-    constructor(uint256 _cut){
-        require(_cut <= 10000);
-        ownerCut = _cut;
+    constructor(){
+        ownerCut = 500;
     }
 
     function withdrawBalance() external onlyCFO{
